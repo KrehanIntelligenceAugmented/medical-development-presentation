@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medizinische Entwicklung für das lernende Klinikum</title>
+  <style>
+    :root {
+      --bg: #050608;
+      --text: #f5f7fb;
+      --muted: rgba(245, 247, 251, .68);
+      --soft: rgba(245, 247, 251, .44);
+      --line: rgba(255, 255, 255, .15);
+      --glass: rgba(255, 255, 255, .055);
+      --cyan: #5ee7ff;
+      --mint: #8fffd2;
+      --gold: #f4c96b;
+      --violet: #b9a7ff;
+      --coral: #ff9a9a;
+      --steel: #a8c7ff;
+      --shadow: 0 28px 90px rgba(0, 0, 0, .55);
+      --ease: cubic-bezier(.2, .8, .2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        radial-gradient(circle at 16% 24%, rgba(94, 231, 255, .15), transparent 30%),
+        radial-gradient(circle at 79% 68%, rgba(244, 201, 107, .11), transparent 28%),
+        radial-gradient(circle at 52% 92%, rgba(143, 255, 210, .08), transparent 34%),
+        linear-gradient(135deg, #040507 0%, #0c1118 50%, #050608 100%);
+    }
+
+    body::after {
+      opacity: .26;
+      background-image:
+        linear-gradient(rgba(255,255,255,.052) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.052) 1px, transparent 1px);
+      background-size: 76px 76px;
+      mask-image: radial-gradient(circle at center, black 0%, transparent 74%);
+    }
+
+    .deck {
+      position: relative;
+      z-index: 1;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(420px, .98fr);
+      gap: clamp(30px, 5vw, 78px);
+      align-items: center;
+      padding: clamp(36px, 5.4vw, 88px);
+      opacity: 0;
+      transform: translate3d(32px, 0, 0) scale(.985);
+      transition: opacity 720ms var(--ease), transform 720ms var(--ease);
+      pointer-events: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+      pointer-events: auto;
+    }
+
+    .slide.exiting {
+      transform: translate3d(-26px, 0, 0) scale(.99);
+    }
+
+    .content {
+      max-width: 960px;
+    }
+
+    .question {
+      margin: 0 0 18px;
+      color: var(--mint);
+      font-size: clamp(11px, 1vw, 15px);
+      font-weight: 740;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: .99;
+      font-weight: 760;
+    }
+
+    h1 {
+      max-width: 1040px;
+      font-size: clamp(43px, 5.45vw, 96px);
+    }
+
+    .slide[data-title="Paradigma"] h1 {
+      max-width: 620px;
+      font-size: clamp(40px, 4.72vw, 84px);
+    }
+
+    h2 {
+      max-width: 960px;
+      font-size: clamp(39px, 4.55vw, 78px);
+    }
+
+    .lead {
+      margin: 25px 0 0;
+      max-width: 780px;
+      color: var(--muted);
+      font-size: clamp(18px, 1.78vw, 30px);
+      line-height: 1.25;
+      font-weight: 430;
+    }
+
+    .thesis {
+      margin-top: 32px;
+      padding-left: 20px;
+      border-left: 2px solid var(--cyan);
+      max-width: 800px;
+      color: rgba(245, 247, 251, .86);
+      font-size: clamp(16px, 1.28vw, 22px);
+      line-height: 1.42;
+    }
+
+    .caption {
+      margin-top: 26px;
+      max-width: 760px;
+      color: var(--soft);
+      font-size: clamp(14px, 1vw, 17px);
+      line-height: 1.42;
+    }
+
+    .chips {
+      margin-top: 31px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      min-height: 36px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 13px;
+      background: rgba(255,255,255,.045);
+      color: rgba(245,247,251,.79);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      font-size: clamp(12px, .88vw, 15px);
+      white-space: nowrap;
+    }
+
+    .visual {
+      position: relative;
+      min-height: min(64vh, 680px);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 8px;
+      background:
+        linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.018)),
+        radial-gradient(circle at 30% 23%, rgba(94, 231, 255, .14), transparent 42%),
+        radial-gradient(circle at 72% 76%, rgba(244, 201, 107, .10), transparent 43%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.075), transparent);
+      transform: translateX(-110%);
+      animation: scan 9.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .visual::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0%, 30% { transform: translateX(-110%); opacity: 0; }
+      48% { opacity: .62; }
+      68%, 100% { transform: translateX(110%); opacity: 0; }
+    }
+
+    .visual svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    text {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .stroke {
+      vector-effect: non-scaling-stroke;
+    }
+
+    .glow {
+      filter: drop-shadow(0 0 12px rgba(94, 231, 255, .42));
+    }
+
+    .soft-glow {
+      filter: drop-shadow(0 0 18px rgba(143, 255, 210, .26));
+    }
+
+    .metric-grid {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 760px;
+    }
+
+    .metric {
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 8px;
+      padding: 11px 14px;
+      background: rgba(255,255,255,.04);
+      color: rgba(245,247,251,.77);
+      font-size: clamp(14px, .96vw, 17px);
+      line-height: 1.2;
+    }
+
+    .road {
+      margin-top: 28px;
+      display: grid;
+      gap: 10px;
+      max-width: 780px;
+    }
+
+    .road-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 14px;
+      align-items: center;
+      color: rgba(245,247,251,.79);
+      font-size: clamp(15px, 1.05vw, 19px);
+      line-height: 1.27;
+    }
+
+    .road-item::before {
+      content: "";
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.15);
+      background:
+        radial-gradient(circle at center, var(--accent), transparent 43%),
+        rgba(255,255,255,.04);
+      box-shadow: 0 0 24px color-mix(in srgb, var(--accent), transparent 62%);
+    }
+
+    .final-line {
+      margin-top: 28px;
+      max-width: 880px;
+      color: #fff;
+      font-size: clamp(21px, 2vw, 36px);
+      line-height: 1.1;
+      font-weight: 730;
+    }
+
+    .chrome {
+      position: fixed;
+      z-index: 5;
+      left: clamp(22px, 3vw, 48px);
+      right: clamp(22px, 3vw, 48px);
+      bottom: clamp(18px, 2.6vw, 38px);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 18px;
+      pointer-events: none;
+    }
+
+    .progress {
+      height: 2px;
+      background: rgba(255,255,255,.12);
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      width: 16.666%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--mint), var(--gold));
+      box-shadow: 0 0 18px rgba(94,231,255,.42);
+      transition: width 520ms var(--ease);
+    }
+
+    .counter {
+      min-width: 54px;
+      color: rgba(245,247,251,.5);
+      font-size: 12px;
+      text-align: right;
+      letter-spacing: .08em;
+    }
+
+    .brand {
+      position: fixed;
+      z-index: 5;
+      top: clamp(18px, 2.2vw, 34px);
+      right: clamp(22px, 3vw, 48px);
+      color: rgba(245,247,251,.38);
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .active .fade-up {
+      animation: reveal 720ms var(--ease) forwards;
+    }
+
+    .active .fade-up:nth-child(2) { animation-delay: 90ms; }
+    .active .fade-up:nth-child(3) { animation-delay: 180ms; }
+    .active .fade-up:nth-child(4) { animation-delay: 260ms; }
+    .active .fade-up:nth-child(5) { animation-delay: 340ms; }
+
+    @keyframes reveal {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .pulse {
+      animation: pulse 4.6s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: .72; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.025); }
+    }
+
+    .orbit {
+      animation: orbit 22s linear infinite;
+      transform-origin: 400px 320px;
+    }
+
+    .orbit-rev {
+      animation: orbit 30s linear infinite reverse;
+      transform-origin: 400px 320px;
+    }
+
+    @keyframes orbit {
+      to { transform: rotate(360deg); }
+    }
+
+    .draw {
+      stroke-dasharray: 680;
+      stroke-dashoffset: 680;
+    }
+
+    .active .draw {
+      animation: draw 1700ms var(--ease) forwards;
+    }
+
+    @keyframes draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @media (max-width: 980px) {
+      .slide {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(340px, 1fr);
+        gap: 26px;
+        padding: 58px 24px 62px;
+        overflow-y: auto;
+      }
+
+      .visual {
+        min-height: 430px;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      h1 {
+        font-size: clamp(40px, 12vw, 56px);
+      }
+
+      h2 {
+        font-size: clamp(34px, 9.6vw, 46px);
+      }
+
+      .lead {
+        font-size: 19px;
+      }
+
+      .visual {
+        min-height: 390px;
+      }
+
+      .brand {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-live="polite">
+    <section class="slide active" data-title="Paradigma">
+      <div class="content">
+        <p class="question fade-up">Warum brauchen Kliniken ein neues Entwicklungsparadigma?</p>
+        <h1 class="fade-up">Von digitaler Initiative zu institutioneller Entwicklungs&shy;fähigkeit</h1>
+        <p class="lead fade-up">Digitalisierung gelingt, wenn medizinische Realität, Technologie und organisatorische Umsetzung zu einem integrierten System werden.</p>
+        <p class="thesis fade-up">Die zentrale Aufgabe ist nicht der Einsatz einzelner Werkzeuge, sondern die Übersetzung klinischer Einsicht in belastbare Prozesse, Governance und skalierbare Umsetzung.</p>
+      </div>
+      <div class="visual" aria-hidden="true">
+        <svg viewBox="0 0 800 640" role="img">
+          <defs>
+            <linearGradient id="triLine" x1="95" y1="510" x2="705" y2="120" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#5ee7ff" stop-opacity=".28"/>
+              <stop offset=".52" stop-color="#8fffd2" stop-opacity=".92"/>
+              <stop offset="1" stop-color="#f4c96b" stop-opacity=".34"/>
+            </linearGradient>
+            <radialGradient id="coreGlow" cx="42%" cy="34%">
+              <stop offset="0" stop-color="#ffffff"/>
+              <stop offset=".44" stop-color="#8fffd2"/>
+              <stop offset="1" stop-color="#5ee7ff"/>
+            </radialGradient>
+          </defs>
+          <path class="draw stroke glow" d="M154 470 L400 122 L646 470 Z" fill="none" stroke="url(#triLine)" stroke-width="2.4"/>
+          <path class="stroke" d="M214 424 C304 292 496 292 586 424" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.3"/>
+          <path class="stroke" d="M240 386 C332 448 468 448 560 386" fill="none" stroke="rgba(143,255,210,.22)" stroke-width="1.5"/>
+          <circle cx="400" cy="330" r="94" fill="url(#coreGlow)" class="soft-glow pulse"/>
+          <circle cx="400" cy="330" r="125" fill="none" stroke="rgba(143,255,210,.20)" stroke-width="1.2"/>
+          <circle cx="400" cy="330" r="164" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+          <g>
+            <rect x="80" y="422" width="190" height="72" rx="36" fill="rgba(5,6,8,.72)" stroke="rgba(255,255,255,.18)"/>
+            <text x="175" y="453" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="720">Medizin</text>
+            <text x="175" y="476" text-anchor="middle" fill="rgba(245,247,251,.58)" font-size="12">klinische Realität</text>
+          </g>
+          <g>
+            <rect x="305" y="64" width="190" height="72" rx="36" fill="rgba(5,6,8,.72)" stroke="rgba(255,255,255,.18)"/>
+            <text x="400" y="95" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="720">Technologie</text>
+            <text x="400" y="118" text-anchor="middle" fill="rgba(245,247,251,.58)" font-size="12">Daten, KI, Systeme</text>
+          </g>
+          <g>
+            <rect x="530" y="422" width="190" height="72" rx="36" fill="rgba(5,6,8,.72)" stroke="rgba(255,255,255,.18)"/>
+            <text x="625" y="453" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="720">Organisation</text>
+            <text x="625" y="476" text-anchor="middle" fill="rgba(245,247,251,.58)" font-size="12">Steuerung, Umsetzung</text>
+          </g>
+          <text x="400" y="318" text-anchor="middle" fill="#061014" font-size="21" font-weight="820">integriertes</text>
+          <text x="400" y="345" text-anchor="middle" fill="#061014" font-size="21" font-weight="820">Betriebssystem</text>
+          <text x="400" y="374" text-anchor="middle" fill="rgba(6,16,20,.72)" font-size="13" font-weight="680">für digitale Medizin</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Rolle">
+      <div class="content">
+        <p class="question fade-up">Welche Rolle schließt die Lücke zwischen Klinik und Umsetzung?</p>
+        <h2 class="fade-up">Der Medical Developer als Übersetzungsfunktion</h2>
+        <p class="lead fade-up">Eine medizinisch verankerte Entwicklungsrolle, die klinische Einsicht in entscheidungsfähige, umsetzbare und governance-fähige Innovation übersetzt.</p>
+        <div class="chips fade-up">
+          <span class="chip">Medical Developer</span>
+          <span class="chip">Klinischer Systemarchitekt</span>
+          <span class="chip">Übersetzungsarchitekt</span>
+        </div>
+      </div>
+      <div class="visual" aria-hidden="true">
+        <svg viewBox="0 0 800 640" role="img">
+          <defs>
+            <radialGradient id="roleCore" cx="38%" cy="28%">
+              <stop offset="0" stop-color="#ffffff"/>
+              <stop offset=".48" stop-color="#8fffd2"/>
+              <stop offset="1" stop-color="#5ee7ff"/>
+            </radialGradient>
+            <linearGradient id="roleRing" x1="120" y1="120" x2="680" y2="520" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#5ee7ff" stop-opacity=".32"/>
+              <stop offset=".5" stop-color="#8fffd2" stop-opacity=".75"/>
+              <stop offset="1" stop-color="#f4c96b" stop-opacity=".28"/>
+            </linearGradient>
+          </defs>
+          <circle cx="400" cy="320" r="220" fill="none" stroke="rgba(255,255,255,.11)" stroke-width="1.2"/>
+          <circle cx="400" cy="320" r="156" fill="none" stroke="url(#roleRing)" stroke-width="1.5" class="orbit"/>
+          <circle cx="400" cy="320" r="106" fill="none" stroke="rgba(143,255,210,.20)" stroke-width="1.1" class="orbit-rev"/>
+          <g stroke="rgba(255,255,255,.15)" stroke-width="1.2">
+            <line class="stroke" x1="400" y1="320" x2="400" y2="92"/>
+            <line class="stroke" x1="400" y1="320" x2="604" y2="162"/>
+            <line class="stroke" x1="400" y1="320" x2="660" y2="320"/>
+            <line class="stroke" x1="400" y1="320" x2="604" y2="478"/>
+            <line class="stroke" x1="400" y1="320" x2="400" y2="548"/>
+            <line class="stroke" x1="400" y1="320" x2="196" y2="478"/>
+            <line class="stroke" x1="400" y1="320" x2="140" y2="320"/>
+            <line class="stroke" x1="400" y1="320" x2="196" y2="162"/>
+          </g>
+          <circle cx="400" cy="320" r="96" fill="url(#roleCore)" class="soft-glow"/>
+          <text x="400" y="303" text-anchor="middle" fill="#061014" font-size="21" font-weight="820">Medical</text>
+          <text x="400" y="331" text-anchor="middle" fill="#061014" font-size="21" font-weight="820">Developer</text>
+          <text x="400" y="359" text-anchor="middle" fill="rgba(6,16,20,.72)" font-size="12" font-weight="680">klinische Übersetzung</text>
+          <g fill="rgba(5,6,8,.74)" stroke="rgba(255,255,255,.17)">
+            <rect x="306" y="48" width="188" height="56" rx="28"/><text x="400" y="82" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">Klinische Medizin</text>
+            <rect x="544" y="128" width="150" height="56" rx="28"/><text x="619" y="162" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">IT / MIT</text>
+            <rect x="604" y="292" width="156" height="56" rx="28"/><text x="682" y="326" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">Institutionelle KI</text>
+            <rect x="536" y="456" width="158" height="56" rx="28"/><text x="615" y="490" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">Recht</text>
+            <rect x="314" y="536" width="172" height="56" rx="28"/><text x="400" y="570" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">Ethik</text>
+            <rect x="106" y="456" width="174" height="56" rx="28"/><text x="193" y="490" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">Forschung / SCCR</text>
+            <rect x="40" y="292" width="168" height="56" rx="28"/><text x="124" y="326" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">Management</text>
+            <rect x="96" y="128" width="196" height="56" rx="28"/><text x="194" y="162" text-anchor="middle" fill="#f5f7fb" font-size="14" font-weight="720">Organisationsentwicklung</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Architektur">
+      <div class="content">
+        <p class="question fade-up">Wie wird aus Einzelprojekten ein steuerbares System?</p>
+        <h2 class="fade-up">Eine Drei-Ebenen-Architektur für digitale Medizin</h2>
+        <p class="lead fade-up">Patientennahe Prozesse, Interoperabilität und Managementlogik müssen gemeinsam entwickelt werden.</p>
+        <p class="caption fade-up">So entsteht kein zusätzlicher Parallelbetrieb, sondern eine belastbare Infrastruktur für Patient First, Lean Hospital und institutionelles Lernen.</p>
+      </div>
+      <div class="visual" aria-hidden="true">
+        <svg viewBox="0 0 800 640" role="img">
+          <defs>
+            <linearGradient id="layerTop" x1="120" y1="110" x2="680" y2="220">
+              <stop offset="0" stop-color="#f4c96b" stop-opacity=".22"/>
+              <stop offset="1" stop-color="#f4c96b" stop-opacity=".06"/>
+            </linearGradient>
+            <linearGradient id="layerMid" x1="120" y1="260" x2="680" y2="370">
+              <stop offset="0" stop-color="#5ee7ff" stop-opacity=".24"/>
+              <stop offset="1" stop-color="#5ee7ff" stop-opacity=".06"/>
+            </linearGradient>
+            <linearGradient id="layerBot" x1="120" y1="410" x2="680" y2="520">
+              <stop offset="0" stop-color="#8fffd2" stop-opacity=".24"/>
+              <stop offset="1" stop-color="#8fffd2" stop-opacity=".06"/>
+            </linearGradient>
+          </defs>
+          <g class="soft-glow">
+            <path d="M128 86 L672 86 L618 218 L182 218 Z" fill="url(#layerTop)" stroke="rgba(244,201,107,.42)" stroke-width="1.3"/>
+            <path d="M128 254 L672 254 L618 386 L182 386 Z" fill="url(#layerMid)" stroke="rgba(94,231,255,.42)" stroke-width="1.3"/>
+            <path d="M128 422 L672 422 L618 554 L182 554 Z" fill="url(#layerBot)" stroke="rgba(143,255,210,.42)" stroke-width="1.3"/>
+          </g>
+          <g stroke="rgba(255,255,255,.14)" stroke-width="1.1">
+            <line class="stroke" x1="182" y1="218" x2="182" y2="254"/>
+            <line class="stroke" x1="618" y1="218" x2="618" y2="254"/>
+            <line class="stroke" x1="182" y1="386" x2="182" y2="422"/>
+            <line class="stroke" x1="618" y1="386" x2="618" y2="422"/>
+            <line class="stroke" x1="400" y1="218" x2="400" y2="422"/>
+          </g>
+          <g>
+            <circle cx="210" cy="152" r="34" fill="rgba(244,201,107,.18)" stroke="rgba(244,201,107,.42)"/>
+            <path d="M194 153 L207 153 L214 139 L226 167 L233 153 L244 153" fill="none" stroke="#f4c96b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="270" y="126" fill="#f5f7fb" font-size="20" font-weight="780">
+              <tspan x="270" dy="0">Management- und</tspan>
+              <tspan x="270" dy="24">Strategieebene</tspan>
+            </text>
+            <text x="270" y="174" fill="rgba(245,247,251,.65)" font-size="13">
+              <tspan x="270" dy="0">Entscheidungsunterstützung, Ressourcen,</tspan>
+              <tspan x="270" dy="16">Kommunikation, Portfolio-Steuerung</tspan>
+            </text>
+          </g>
+          <g>
+            <circle cx="210" cy="320" r="34" fill="rgba(94,231,255,.16)" stroke="rgba(94,231,255,.42)"/>
+            <path d="M193 320 C210 299 232 299 249 320 C232 341 210 341 193 320 Z" fill="none" stroke="#5ee7ff" stroke-width="2.7"/>
+            <circle cx="221" cy="320" r="5" fill="#5ee7ff"/>
+            <text x="270" y="294" fill="#f5f7fb" font-size="20" font-weight="780">
+              <tspan x="270" dy="0">Translations- und</tspan>
+              <tspan x="270" dy="24">Interoperabilitätsebene</tspan>
+            </text>
+            <text x="270" y="342" fill="rgba(245,247,251,.65)" font-size="13">
+              <tspan x="270" dy="0">KIS, FHIR, Recht, Ethik, AI Hub, SCCR,</tspan>
+              <tspan x="270" dy="16">Telemedizin, Schnittstellen</tspan>
+            </text>
+          </g>
+          <g>
+            <circle cx="210" cy="488" r="34" fill="rgba(143,255,210,.16)" stroke="rgba(143,255,210,.42)"/>
+            <path d="M190 488 C214 468 230 468 250 488 C230 508 214 508 190 488 Z" fill="none" stroke="#8fffd2" stroke-width="2.7"/>
+            <path d="M203 488 L216 488 L222 476 L233 500 L238 488 L250 488" fill="none" stroke="#8fffd2" stroke-width="2.4" stroke-linecap="round"/>
+            <text x="270" y="480" fill="#f5f7fb" font-size="20" font-weight="780">Klinischer Kernprozess</text>
+            <text x="270" y="508" fill="rgba(245,247,251,.65)" font-size="13">
+              <tspan x="270" dy="0">Ambient Listening, Ambient Scribe,</tspan>
+              <tspan x="270" dy="16">Smart SOPs, Prognosemodelle, Wissen</tspan>
+            </text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Evidenz">
+      <div class="content">
+        <p class="question fade-up">Woran ist diese Fähigkeit bereits erkennbar?</p>
+        <h2 class="fade-up">Aktive Handlungsfelder über alle Ebenen hinweg</h2>
+        <p class="lead fade-up">Die laufenden Projekte zeigen strategische Reichweite: vom klinischen Kontaktpunkt über Wissensmanagement bis zu Governance, Kommunikation und Ressourcensteuerung.</p>
+      </div>
+      <div class="visual" aria-hidden="true">
+        <svg viewBox="0 0 800 640" role="img">
+          <defs>
+            <linearGradient id="proofMap" x1="90" y1="100" x2="710" y2="540">
+              <stop offset="0" stop-color="#8fffd2" stop-opacity=".38"/>
+              <stop offset=".5" stop-color="#5ee7ff" stop-opacity=".46"/>
+              <stop offset="1" stop-color="#f4c96b" stop-opacity=".36"/>
+            </linearGradient>
+          </defs>
+          <path d="M142 172 L314 112 L548 146 L674 304 L562 500 L312 522 L130 372 Z" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1.2"/>
+          <path class="draw stroke" d="M206 214 C302 148 432 158 550 218 C646 267 642 394 540 448 C426 508 274 466 198 360 C152 296 158 246 206 214 Z" fill="none" stroke="url(#proofMap)" stroke-width="2.2"/>
+          <circle cx="400" cy="320" r="54" fill="rgba(143,255,210,.08)" stroke="rgba(143,255,210,.28)"/>
+          <text x="400" y="315" text-anchor="middle" fill="#f5f7fb" font-size="15" font-weight="760">Medical</text>
+          <text x="400" y="337" text-anchor="middle" fill="#f5f7fb" font-size="15" font-weight="760">Development</text>
+          <g stroke="rgba(255,255,255,.16)" stroke-width="1.1">
+            <line class="stroke" x1="400" y1="320" x2="196" y2="170"/>
+            <line class="stroke" x1="400" y1="320" x2="532" y2="134"/>
+            <line class="stroke" x1="400" y1="320" x2="634" y2="300"/>
+            <line class="stroke" x1="400" y1="320" x2="570" y2="476"/>
+            <line class="stroke" x1="400" y1="320" x2="270" y2="492"/>
+            <line class="stroke" x1="400" y1="320" x2="154" y2="365"/>
+          </g>
+          <g>
+            <rect x="72" y="128" width="232" height="58" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(143,255,210,.32)"/>
+            <circle cx="92" cy="128" r="6" fill="#8fffd2" class="glow"/>
+            <text x="96" y="154" fill="#f5f7fb" font-size="13" font-weight="720">1450 und Telemedizin</text>
+            <text x="96" y="173" fill="rgba(245,247,251,.6)" font-size="11">Kontaktpunkt, Triage, Versorgungspfad</text>
+          </g>
+          <g>
+            <rect x="460" y="98" width="224" height="68" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(94,231,255,.32)"/>
+            <circle cx="484" cy="98" r="6" fill="#5ee7ff" class="glow"/>
+            <text x="490" y="124" fill="#f5f7fb" font-size="13" font-weight="720">ClinicalKey AI</text>
+            <text x="490" y="143" fill="rgba(245,247,251,.6)" font-size="11">Wissensmanagement 2.0</text>
+          </g>
+          <g>
+            <rect x="532" y="268" width="204" height="70" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(94,231,255,.32)"/>
+            <circle cx="556" cy="268" r="6" fill="#5ee7ff" class="glow"/>
+            <text x="562" y="286" fill="#f5f7fb" font-size="12" font-weight="720">
+              <tspan x="562" dy="0">KIS-Patch-</tspan>
+              <tspan x="562" dy="14">Kommunikation</tspan>
+              <tspan x="562" dy="14">Umsetzung</tspan>
+            </text>
+            <text x="562" y="329" fill="rgba(245,247,251,.6)" font-size="10">Vertrauen, Verständlichkeit</text>
+          </g>
+          <g>
+            <rect x="466" y="456" width="230" height="76" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(244,201,107,.34)"/>
+            <circle cx="490" cy="456" r="6" fill="#f4c96b" class="glow"/>
+            <text x="496" y="474" fill="#f5f7fb" font-size="12" font-weight="720">
+              <tspan x="496" dy="0">Termin- und</tspan>
+              <tspan x="496" dy="14">Ressourcenplanung</tspan>
+              <tspan x="496" dy="14">Steuerung</tspan>
+            </text>
+            <text x="496" y="517" fill="rgba(245,247,251,.6)" font-size="10">Lean Hospital, vorausschauend</text>
+          </g>
+          <g>
+            <rect x="152" y="462" width="210" height="68" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(143,255,210,.32)"/>
+            <circle cx="176" cy="462" r="6" fill="#8fffd2" class="glow"/>
+            <text x="182" y="488" fill="#f5f7fb" font-size="13" font-weight="720">Ambient Scribe / Listening</text>
+            <text x="182" y="507" fill="rgba(245,247,251,.6)" font-size="11">Dokumentation, Entlastung, Qualität</text>
+          </g>
+          <g>
+            <rect x="72" y="332" width="232" height="76" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(143,255,210,.32)"/>
+            <circle cx="96" cy="332" r="6" fill="#8fffd2" class="glow"/>
+            <text x="102" y="358" fill="#f5f7fb" font-size="13" font-weight="720">Health Center Plattform</text>
+            <text x="102" y="377" fill="rgba(245,247,251,.6)" font-size="11">strukturierte Information, Prozesslogik</text>
+          </g>
+          <g>
+            <rect x="308" y="44" width="178" height="62" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(185,167,255,.34)"/>
+            <circle cx="332" cy="44" r="6" fill="#b9a7ff" class="glow"/>
+            <text x="338" y="70" fill="#f5f7fb" font-size="13" font-weight="720">KI, MedTech & Recht</text>
+            <text x="338" y="89" fill="rgba(245,247,251,.6)" font-size="11">Recht, Markt, Verantwortung</text>
+          </g>
+          <g>
+            <rect x="306" y="548" width="214" height="56" rx="8" fill="rgba(5,6,8,.72)" stroke="rgba(244,201,107,.34)"/>
+            <circle cx="330" cy="548" r="6" fill="#f4c96b" class="glow"/>
+            <text x="336" y="574" fill="#f5f7fb" font-size="13" font-weight="720">Bund-Land Beitrag</text>
+            <text x="336" y="593" fill="rgba(245,247,251,.6)" font-size="11">Vorsorge junge Erwachsene</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Partnerschaften">
+      <div class="content">
+        <p class="question fade-up">Warum sind öffentlich-private Partnerschaften strategisch relevant?</p>
+        <h2 class="fade-up">Partnerschaften werden erst durch Governance skalierbar</h2>
+        <p class="lead fade-up">Hochwertige Kooperationen verbinden klinischen Bedarf, technologische Reife und institutionelle Verantwortung.</p>
+        <div class="metric-grid fade-up">
+          <div class="metric">gezielter Zugang zu Technologie und Umsetzungskapazität</div>
+          <div class="metric">klinische Evidenz statt isolierter Pilotlogik</div>
+          <div class="metric">klare rechtliche, ethische und kommunikative Leitplanken</div>
+          <div class="metric">Skalierung entlang echter Versorgungsprozesse</div>
+        </div>
+      </div>
+      <div class="visual" aria-hidden="true">
+        <svg viewBox="0 0 800 640" role="img">
+          <defs>
+            <linearGradient id="bridge" x1="118" y1="330" x2="682" y2="330">
+              <stop offset="0" stop-color="#8fffd2" stop-opacity=".8"/>
+              <stop offset=".5" stop-color="#5ee7ff" stop-opacity=".85"/>
+              <stop offset="1" stop-color="#f4c96b" stop-opacity=".85"/>
+            </linearGradient>
+            <radialGradient id="pppCore" cx="46%" cy="35%">
+              <stop offset="0" stop-color="#fff"/>
+              <stop offset=".45" stop-color="#8fffd2"/>
+              <stop offset="1" stop-color="#5ee7ff"/>
+            </radialGradient>
+          </defs>
+          <path d="M128 386 C250 278 550 278 672 386" fill="none" stroke="url(#bridge)" stroke-width="3" class="draw glow"/>
+          <path d="M128 414 C250 306 550 306 672 414" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="1.3"/>
+          <g stroke="rgba(255,255,255,.16)" stroke-width="1.2">
+            <line class="stroke" x1="198" y1="356" x2="198" y2="470"/>
+            <line class="stroke" x1="304" y1="322" x2="304" y2="470"/>
+            <line class="stroke" x1="400" y1="312" x2="400" y2="470"/>
+            <line class="stroke" x1="496" y1="322" x2="496" y2="470"/>
+            <line class="stroke" x1="602" y1="356" x2="602" y2="470"/>
+          </g>
+          <rect x="114" y="470" width="572" height="44" rx="22" fill="rgba(255,255,255,.055)" stroke="rgba(255,255,255,.14)"/>
+          <text x="400" y="498" text-anchor="middle" fill="rgba(245,247,251,.72)" font-size="13" font-weight="680">institutionelle Governance als tragende Struktur</text>
+          <g>
+            <circle cx="158" cy="214" r="70" fill="rgba(143,255,210,.10)" stroke="rgba(143,255,210,.34)"/>
+            <text x="158" y="204" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="760">klinischer</text>
+            <text x="158" y="228" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="760">Bedarf</text>
+          </g>
+          <g>
+            <circle cx="400" cy="214" r="86" fill="url(#pppCore)" class="soft-glow pulse"/>
+            <text x="400" y="199" text-anchor="middle" fill="#061014" font-size="19" font-weight="840">kuratierte</text>
+            <text x="400" y="225" text-anchor="middle" fill="#061014" font-size="19" font-weight="840">Partnerschaft</text>
+            <text x="400" y="251" text-anchor="middle" fill="rgba(6,16,20,.70)" font-size="12" font-weight="700">mit institutioneller Logik</text>
+          </g>
+          <g>
+            <circle cx="642" cy="214" r="70" fill="rgba(244,201,107,.10)" stroke="rgba(244,201,107,.34)"/>
+            <text x="642" y="204" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="760">technologische</text>
+            <text x="642" y="228" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="760">Reife</text>
+          </g>
+          <g stroke="rgba(255,255,255,.14)" stroke-width="1.1">
+            <line class="stroke" x1="228" y1="214" x2="314" y2="214"/>
+            <line class="stroke" x1="486" y1="214" x2="572" y2="214"/>
+          </g>
+          <g>
+            <rect x="166" y="552" width="122" height="42" rx="21" fill="rgba(5,6,8,.62)" stroke="rgba(255,255,255,.14)"/>
+            <text x="227" y="578" text-anchor="middle" fill="rgba(245,247,251,.78)" font-size="12" font-weight="700">Recht</text>
+            <rect x="300" y="552" width="122" height="42" rx="21" fill="rgba(5,6,8,.62)" stroke="rgba(255,255,255,.14)"/>
+            <text x="361" y="578" text-anchor="middle" fill="rgba(245,247,251,.78)" font-size="12" font-weight="700">Ethik</text>
+            <rect x="434" y="552" width="122" height="42" rx="21" fill="rgba(5,6,8,.62)" stroke="rgba(255,255,255,.14)"/>
+            <text x="495" y="578" text-anchor="middle" fill="rgba(245,247,251,.78)" font-size="12" font-weight="700">Evidenz</text>
+            <rect x="568" y="552" width="122" height="42" rx="21" fill="rgba(5,6,8,.62)" stroke="rgba(255,255,255,.14)"/>
+            <text x="629" y="578" text-anchor="middle" fill="rgba(245,247,251,.78)" font-size="12" font-weight="700">Skalierung</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Zielbild">
+      <div class="content">
+        <p class="question fade-up">Wohin führt diese Entwicklung?</p>
+        <h2 class="fade-up">Vom Projektportfolio zum lernenden Kliniksystem</h2>
+        <div class="road fade-up">
+          <div class="road-item" style="--accent: var(--mint);">klinische Kernprozesse priorisieren und als Prototypen operationalisieren</div>
+          <div class="road-item" style="--accent: var(--cyan);">Standards, Schnittstellen und Governance systematisch verankern</div>
+          <div class="road-item" style="--accent: var(--gold);">wirksame Lösungen skalieren und Ressourcen vorausschauend steuern</div>
+          <div class="road-item" style="--accent: var(--violet);">institutionelles Lernen in Versorgung, Forschung und Management zurückführen</div>
+        </div>
+        <p class="final-line fade-up">Das ist keine weitere KI-Initiative. Es ist ein neues Betriebsmodell für das lernende Klinikum.</p>
+      </div>
+      <div class="visual" aria-hidden="true">
+        <svg viewBox="0 0 800 640" role="img">
+          <defs>
+            <linearGradient id="roadmap" x1="130" y1="492" x2="682" y2="148">
+              <stop offset="0" stop-color="#8fffd2" stop-opacity=".9"/>
+              <stop offset=".46" stop-color="#5ee7ff" stop-opacity=".9"/>
+              <stop offset="1" stop-color="#f4c96b" stop-opacity=".9"/>
+            </linearGradient>
+            <radialGradient id="learningCore" cx="42%" cy="30%">
+              <stop offset="0" stop-color="#fff"/>
+              <stop offset=".44" stop-color="#8fffd2"/>
+              <stop offset="1" stop-color="#5ee7ff"/>
+            </radialGradient>
+          </defs>
+          <path d="M110 510 C218 420 265 497 350 392 C425 300 508 336 584 232 C622 180 660 160 704 142" fill="none" stroke="url(#roadmap)" stroke-width="3.2" class="draw glow"/>
+          <path d="M100 542 L704 542" stroke="rgba(255,255,255,.13)" stroke-width="1.2"/>
+          <path d="M160 108 L160 542 M300 108 L300 542 M440 108 L440 542 M580 108 L580 542" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+          <g>
+            <circle cx="150" cy="480" r="42" fill="rgba(143,255,210,.12)" stroke="rgba(143,255,210,.40)"/>
+            <text x="150" y="475" text-anchor="middle" fill="#f5f7fb" font-size="13" font-weight="760">Nutzen-</text>
+            <text x="150" y="493" text-anchor="middle" fill="rgba(245,247,251,.62)" font-size="10">nachweis</text>
+          </g>
+          <g>
+            <circle cx="314" cy="414" r="48" fill="rgba(94,231,255,.12)" stroke="rgba(94,231,255,.40)"/>
+            <text x="314" y="408" text-anchor="middle" fill="#f5f7fb" font-size="13" font-weight="760">Standards</text>
+            <text x="314" y="428" text-anchor="middle" fill="rgba(245,247,251,.62)" font-size="10">Schnittstellen</text>
+          </g>
+          <g>
+            <circle cx="478" cy="318" r="54" fill="rgba(244,201,107,.12)" stroke="rgba(244,201,107,.42)"/>
+            <text x="478" y="312" text-anchor="middle" fill="#f5f7fb" font-size="13" font-weight="760">Gesteuerte</text>
+            <text x="478" y="332" text-anchor="middle" fill="rgba(245,247,251,.62)" font-size="10">Skalierung</text>
+          </g>
+          <g>
+            <circle cx="640" cy="176" r="78" fill="url(#learningCore)" class="soft-glow pulse"/>
+            <text x="640" y="160" text-anchor="middle" fill="#061014" font-size="17" font-weight="850">Lernendes</text>
+            <text x="640" y="184" text-anchor="middle" fill="#061014" font-size="17" font-weight="850">Klinikum</text>
+            <text x="640" y="208" text-anchor="middle" fill="rgba(6,16,20,.70)" font-size="11" font-weight="700">Betriebsmodell</text>
+          </g>
+          <g stroke="rgba(255,255,255,.14)" stroke-width="1.2" fill="none">
+            <path class="stroke" d="M604 300 C526 422 366 514 188 510"/>
+            <path class="stroke" d="M610 332 C522 474 320 560 134 540"/>
+            <path class="stroke" d="M587 282 L604 300 L578 304"/>
+            <path class="stroke" d="M594 314 L610 332 L584 337"/>
+          </g>
+          <text x="338" y="574" text-anchor="middle" fill="rgba(245,247,251,.60)" font-size="12" font-weight="700">Rückkopplung in Versorgung, Forschung und Management</text>
+        </svg>
+      </div>
+    </section>
+  </main>
+
+  <div class="brand">Medizinische Entwicklung</div>
+  <div class="chrome" aria-hidden="true">
+    <div class="progress"><span></span></div>
+    <div class="counter">01 / 06</div>
+  </div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const counter = document.querySelector(".counter");
+    const progress = document.querySelector(".progress span");
+    let index = 0;
+
+    function showSlide(next) {
+      const bounded = Math.max(0, Math.min(slides.length - 1, next));
+      if (bounded === index) return;
+      slides[index].classList.remove("active");
+      slides[index].classList.add("exiting");
+      index = bounded;
+      slides[index].classList.remove("exiting");
+      slides[index].classList.add("active");
+      window.setTimeout(() => {
+        slides.forEach((slide, i) => {
+          if (i !== index) slide.classList.remove("exiting");
+        });
+      }, 760);
+      updateChrome();
+    }
+
+    function updateChrome() {
+      counter.textContent = `${String(index + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")}`;
+      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+      document.title = `${slides[index].dataset.title} - Medizinische Entwicklung`;
+    }
+
+    document.addEventListener("keydown", (event) => {
+      const forwardKeys = ["ArrowRight", "ArrowDown", " ", "PageDown", "Enter"];
+      const backKeys = ["ArrowLeft", "ArrowUp", "PageUp", "Backspace"];
+      if (forwardKeys.includes(event.key)) {
+        event.preventDefault();
+        showSlide(index + 1);
+      }
+      if (backKeys.includes(event.key)) {
+        event.preventDefault();
+        showSlide(index - 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        showSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        showSlide(slides.length - 1);
+      }
+      if (event.key.toLowerCase() === "f" && document.fullscreenEnabled) {
+        event.preventDefault();
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          document.documentElement.requestFullscreen();
+        }
+      }
+    });
+
+    document.addEventListener("click", () => showSlide(index + 1));
+    updateChrome();
+  </script>
+</body>
+</html>
