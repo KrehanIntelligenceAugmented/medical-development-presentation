@@ -125,6 +125,15 @@
       font-size: clamp(40px, 4.72vw, 84px);
     }
 
+    /* Slide 2 headline: scale down on desktop so the long word
+       "Übersetzungsfunktion" stays on one line, written out (no hyphen),
+       fully inside the dark left column and clear of the graphic. */
+    @media (min-width: 900px) {
+      .slide[data-title="Rolle"] h2 {
+        font-size: clamp(30px, 3.3vw, 64px);
+      }
+    }
+
     h2 {
       max-width: 960px;
       font-size: clamp(39px, 4.55vw, 78px);
@@ -541,17 +550,17 @@
           <g>
             <rect x="80" y="422" width="190" height="72" rx="36" fill="rgba(5,6,8,.72)" stroke="rgba(255,255,255,.18)"/>
             <text x="175" y="453" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="720">Medizin</text>
-            <text x="175" y="476" text-anchor="middle" fill="rgba(245,247,251,.58)" font-size="12">klinische Realität</text>
+            <text x="175" y="476" text-anchor="middle" fill="rgba(245,247,251,.86)" font-size="12">klinische Realität</text>
           </g>
           <g>
             <rect x="305" y="64" width="190" height="72" rx="36" fill="rgba(5,6,8,.72)" stroke="rgba(255,255,255,.18)"/>
             <text x="400" y="95" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="720">Technologie</text>
-            <text x="400" y="118" text-anchor="middle" fill="rgba(245,247,251,.58)" font-size="12">Daten, KI, Systeme</text>
+            <text x="400" y="118" text-anchor="middle" fill="rgba(245,247,251,.86)" font-size="12">Daten, KI, Systeme</text>
           </g>
           <g>
             <rect x="530" y="422" width="190" height="72" rx="36" fill="rgba(5,6,8,.72)" stroke="rgba(255,255,255,.18)"/>
             <text x="625" y="453" text-anchor="middle" fill="#f5f7fb" font-size="17" font-weight="720">Organisation</text>
-            <text x="625" y="476" text-anchor="middle" fill="rgba(245,247,251,.58)" font-size="12">Steuerung, Umsetzung</text>
+            <text x="625" y="476" text-anchor="middle" fill="rgba(245,247,251,.86)" font-size="12">Steuerung, Umsetzung</text>
           </g>
           <text x="400" y="318" text-anchor="middle" fill="#061014" font-size="21" font-weight="820">integriertes</text>
           <text x="400" y="345" text-anchor="middle" fill="#061014" font-size="21" font-weight="820">Betriebssystem</text>
